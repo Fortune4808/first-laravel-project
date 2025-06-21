@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Admin\Staff;
-use App\Models\Setup\Gender;
 use Illuminate\Http\Request;
 use App\Models\Setup\MasterCount;
 use Illuminate\Http\JsonResponse;
@@ -60,7 +59,12 @@ class StaffController extends Controller
             'statusId' => 'required|integer'
         ]);
 
-        $staff->update($request->all());
+        $data = $request->all();
+        $data['firstName'] = strtoupper($data['firstName']);
+        $data['middleName'] = strtoupper($data['middleName']);
+        $data['lastName'] = strtoupper($data['lastName']);
+        
+        $staff->update($data);
         return response()->json([
             'status' => true,
             'message' => 'Staff updated successfully'

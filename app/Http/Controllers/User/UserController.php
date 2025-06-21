@@ -19,8 +19,7 @@ class UserController extends Controller
             'lastName' => 'required|string',
             'emailAddress' => 'required|email|unique:users,emailAddress',
             'mobileNumber' => 'required|string|unique:users,mobileNumber',
-            'genderId' => 'required|exists:setup_gender,id',
-            'statusId' => 'required|exists:setup_status,id'
+            'genderId' => 'required|exists:setup_gender,id'
         ]);
 
         $userId = MasterCount::generateCustomId('CUS');
@@ -32,7 +31,7 @@ class UserController extends Controller
             'emailAddress' => (strtolower($request->emailAddress)),
             'mobileNumber' => $request->mobileNumber,
             'genderId' => $request->genderId,
-            'statusId' => $request->statusId,
+            'statusId' => 1,
             'password' => Hash::make($userId)
         ]);
 
@@ -67,7 +66,12 @@ class UserController extends Controller
             'statusId' => 'required|exists:setup_status,id'
         ]);
 
-         $users->update($request->all());
+        $data = $request->all();
+        $data['firstName'] = strtoupper($data['firstName']);
+        $data['middleName'] = strtoupper($data['middleName']);
+        $data['lastName'] = strtoupper($data['lastName']);
+        $users->update($data);
+
         return response()->json([
             'status' => true,
             'message' => 'User updated successfully'
