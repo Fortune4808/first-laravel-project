@@ -65,7 +65,6 @@ class LocationContoller extends Controller
     {
         $location = Location::findOrFail($id);
         $location->delete();
-
         return response()->json([
             'status' => true,
             'message' => 'Location deleted successfully'
