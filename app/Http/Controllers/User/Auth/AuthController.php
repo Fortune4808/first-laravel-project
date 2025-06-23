@@ -5,6 +5,7 @@ use Carbon\Carbon;
 use App\Models\Setup\Otp;
 use App\Models\User\User;
 use Illuminate\Http\Request;
+use App\Models\Setup\MasterCount;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
@@ -41,6 +42,44 @@ class AuthController extends Controller
             'message' => 'Login successful.',
             'token' => $token
         ], 200);
+    }
+
+
+    public function register(Request $request):JsonResponse
+    {
+        $request->validate([
+            'firstName' => 'required|string',
+            'middleName' => 'required|string',
+            'lastName' => 'required|string',
+            'emailAddress' => 'required|email|unique:users,emailAddress',
+            'mobileNumber' => 'required|string|unique:users,mobileNumber',
+            'genderId' => 'required|exists:setup_gender,id'
+        ]);
+
+        $userId = MasterCount::generateCustomId('CUS');
+        $users = User::create([
+            'userId' => $userId,
+            'firstName' => (strtoupper($request->firstName)),
+            'middleName' => (strtoupper($request->middleName)),
+            'lastName' => (strtoupper($request->lastName)),
+            'emailAddress' => (strtolower($request->emailAddress)),
+            'mobileNumber' => $request->mobileNumber,
+            'genderId' => $request->genderId,
+            'statusId' => 1,
+            'password' => Hash::make($userId)
+        ]);
+
+        if ($users){
+            return response()->json([
+            'success' => true,
+            'message' => 'User registration successful.',
+            ], 201);
+        }
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'Registration failed.'
+        ], 500);
     }
     
 

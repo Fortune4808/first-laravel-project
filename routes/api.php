@@ -14,7 +14,7 @@ use App\Http\Controllers\Admin\User\UserController as AdminUserController;
 Route::apiResource('/status', StatusController::class);
 Route::apiResource('/gender', GenderController::class);
 
-Route::apiResource('/user', UserController::class)->only(['store']);
+Route::post('/user/register', [UserAuth::class, 'register']);
 Route::post('/admin/login', [AdminAuth::class, 'login']);
 Route::post('/admin/resetPassword', [AdminAuth::class, 'resetPassword']);
 Route::post('/admin/finishResetPassword', [AdminAuth::class, 'finishResetPassword']);

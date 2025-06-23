@@ -4,50 +4,11 @@ namespace App\Http\Controllers\User;
 
 use App\Models\User\User;
 use Illuminate\Http\Request;
-use App\Models\Setup\MasterCount;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Hash;
 use App\Http\Resources\User\UserResource;
 
 class UserController extends Controller
 {
-    public function store(Request $request)
-    {
-        $request->validate([
-            'firstName' => 'required|string',
-            'middleName' => 'required|string',
-            'lastName' => 'required|string',
-            'emailAddress' => 'required|email|unique:users,emailAddress',
-            'mobileNumber' => 'required|string|unique:users,mobileNumber',
-            'genderId' => 'required|exists:setup_gender,id'
-        ]);
-
-        $userId = MasterCount::generateCustomId('CUS');
-        $users = User::create([
-            'userId' => $userId,
-            'firstName' => (strtoupper($request->firstName)),
-            'middleName' => (strtoupper($request->middleName)),
-            'lastName' => (strtoupper($request->lastName)),
-            'emailAddress' => (strtolower($request->emailAddress)),
-            'mobileNumber' => $request->mobileNumber,
-            'genderId' => $request->genderId,
-            'statusId' => 1,
-            'password' => Hash::make($userId)
-        ]);
-
-        if ($users){
-            return response()->json([
-            'success' => true,
-            'message' => 'User registration successful.',
-            ], 201);
-        }
-        
-        return response()->json([
-            'success' => false,
-            'message' => 'Registration failed.'
-        ], 500);
-    }
-
     public function show(string $id)
     {
         return new UserResource(User::findOrFail($id));
