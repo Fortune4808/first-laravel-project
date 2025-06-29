@@ -8,7 +8,9 @@ use App\Models\Setup\MasterCount;
 use Illuminate\Http\JsonResponse;
 use Spatie\Permission\Models\Role;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Resources\Admin\StaffResource;
 
 class StaffController extends Controller
@@ -16,13 +18,18 @@ class StaffController extends Controller
 
     public function index()
     {
-        $currentStaffId = auth('admin')->id();
-        $staff = Staff::with(['gender', 'status'])->where('staffId', '!=', $currentStaffId)->paginate(50); 
+        $user = Auth::guard('admin')->user();
+        $roleId = $user->roles->first()?->id;
+        
+        if ($roleId==1){ $staff = Staff::with(['gender', 'status'])->where('staffId', '!=', $user->staffId)->paginate(50); }
+        if ($roleId > 1){ $staff = Staff::with(['gender', 'status'])
+            ->where('staffId', '!=', $user->staffId)
+            ->whereHas('roles', function ($query) use ($roleId) { $query->where('id', '>=', $roleId); })->paginate(50); }
 
-        if ($staff->isEmpty()) {return response()->json(['status' => false,'message' => 'No record found!'], 404);}
+        if ($staff->isEmpty()) { return response()->json(['status' => false,'message' => 'No record found!'], 200); }
 
         return response()->json([
-            'status' => true,
+            'success' => true,
             'message' => 'Staff fetched successfully',
             'data' => StaffResource::collection($staff->items()),
             'pagination' => [
@@ -66,7 +73,7 @@ class StaffController extends Controller
         
         $staff->update($data);
         return response()->json([
-            'status' => true,
+            'success' => true,
             'message' => 'Staff updated successfully'
         ], 200);
     }
@@ -82,7 +89,7 @@ class StaffController extends Controller
             'mobileNumber' => 'required|string|unique:staff,mobileNumber',
             'genderId' => 'required|exists:setup_gender,id',
             'roleId' => 'required|exists:roles,id',
-            'statusId' => 'required|exists:setup_status,id'
+            'statusId' => 'required|exists:setup_status,id',
         ]);
 
         $staffId = MasterCount::generateCustomId('STF');
@@ -95,7 +102,8 @@ class StaffController extends Controller
             'mobileNumber' => $request->mobileNumber,
             'genderId' => $request->genderId,
             'statusId' => $request->statusId,
-            'password' => Hash::make($staffId)
+            'password' => Hash::make($staffId),
+            'passport' => 'avatar.jpg'
         ]);
 
         $role = Role::findById($request->roleId, 'admin');
@@ -112,5 +120,32 @@ class StaffController extends Controller
             'success' => false,
             'message' => 'Registration failed.'
         ], 500);
+    }
+
+    public function uploadPassport(Request $request)
+    {
+        $request->validate([
+            'passport' => 'required|image|max:30'
+        ]);
+
+        $staff = auth('admin')->user();
+
+        if ($staff->passport && Storage::exists('public/passports/admin/' . $staff->passport)) {
+            Storage::delete('public/passports/admin/' . $staff->passport);
+        }
+
+        $file = $request->file('passport');
+        $filename = $staff->staffId . '.' . $file->getClientOriginalName();
+        $file->storeAs('public/passports/admin', $filename);
+
+        $staff->passport = $filename;
+        $staff->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Passport uploaded successfully',
+            'passportUrl' => asset('storage/passports/admin/' . $filename),
+        ]);
+
     }
 }

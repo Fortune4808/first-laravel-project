@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\Auth\AuthController as AdminAuth;
 use App\Http\Controllers\Admin\SlotController;
 use App\Http\Controllers\User\Auth\AuthController as UserAuth;
 use App\Http\Controllers\Admin\User\UserController as AdminUserController;
+use App\Http\Controllers\Setup\RoleController;
 
 Route::apiResource('/status', StatusController::class);
 Route::apiResource('/gender', GenderController::class);
@@ -17,6 +18,7 @@ Route::apiResource('/gender', GenderController::class);
 Route::post('/user/register', [UserAuth::class, 'register']);
 Route::post('/admin/login', [AdminAuth::class, 'login']);
 Route::post('/admin/resetPassword', [AdminAuth::class, 'resetPassword']);
+Route::post('/admin/resendOTP', [AdminAuth::class, 'resendOTP']);
 Route::post('/admin/finishResetPassword', [AdminAuth::class, 'finishResetPassword']);
 Route::post('/user/login', [UserAuth::class, 'login']);
 Route::post('/user/resetPassword', [UserAuth::class, 'resetPassword']);
@@ -25,6 +27,10 @@ Route::post('/user/finishResetPassword', [UserAuth::class, 'finishResetPassword'
 Route::middleware(['auth:admin', 'permission:CREATE STAFF'])->group(function () {
    Route::apiResource('/admin', StaffController::class)->only(['store']);
 });
+Route::middleware(['auth:admin'])->group(function () {
+   Route::apiResource('/admin/role', RoleController::class)->only(['index']);
+});
+Route::middleware(['auth:admin'])->post('/admin/passport', [StaffController::class, 'uploadPassport']);
 Route::middleware(['auth:admin', 'permission:VIEW STAFF'])->group(function () {
    Route::apiResource('/admin', StaffController::class)->only(['index', 'show']);
 });

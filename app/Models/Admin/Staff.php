@@ -20,7 +20,8 @@ class Staff extends Authenticatable
     
     protected $fillable = [
         'staffId', 'firstName', 'middleName', 'lastName',
-        'mobileNumber', 'emailAddress', 'genderId', 'statusId', 'password'
+        'mobileNumber', 'emailAddress', 'genderId', 'statusId', 'password',
+        'passport'
     ];
 
     protected $hidden = ['password'];

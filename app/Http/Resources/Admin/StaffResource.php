@@ -20,6 +20,7 @@ class StaffResource extends JsonResource
             'middleName' => $this->middleName,
             'lastName' => $this->lastName,
             'emailAddress' => $this->emailAddress,
+            'mobileNumber' => $this->mobileNumber,
             'gender' => [
                 'genderName' => $this->gender->genderName ?? null,
                 'genderId' => $this->gender->id ?? null,
@@ -33,7 +34,8 @@ class StaffResource extends JsonResource
                 'roleId' => $this->roles->first()?->id,
             ],
             'permissions' => $this->getAllPermissions()->pluck('name'),
-            'passport' => $this->passport
+            'passportUrl' => asset('storage/passports/admin/' . $this->passport),
+            'createdAt' => $this->created_at
         ];
     }
 }

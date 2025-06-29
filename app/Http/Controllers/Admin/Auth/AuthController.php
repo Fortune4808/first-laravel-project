@@ -8,6 +8,7 @@ use App\Models\Admin\Staff;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Admin\StaffResource;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
@@ -25,23 +26,24 @@ class AuthController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'The credentials provided are invalid.'
-            ], 401);
+            ]);
         }
 
         if ($user->statusId==2){
             return response()->json([
                 'success' => false,
                 'message' => 'Staff account has been suspended!'
-            ], 403);
+            ]);
         }
 
-        $token = $user->createToken('admin-token')->plainTextToken;
+        $token = $user->createToken('admin-token')->plainTextToken; 
 
         return response()->json([
             'success' => true,
             'message' => 'Login successful.',
-            'token' => $token
-        ], 200);
+            'token' => $token,
+            'data' => new StaffResource($user)
+        ]);
     }
     
 
@@ -57,14 +59,14 @@ class AuthController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Email Address not found!'
-            ], 404);
+            ]);
         }
 
         if ($user->statusId==2){
             return response()->json([
                 'success' => false,
                 'message' => 'Staff account has been suspended!'
-            ], 403);
+            ]);
         }
 
         if ($user){
@@ -80,11 +82,25 @@ class AuthController extends Controller
             'message' => 'OTP successfully sent',
             'emailAddress' => $user['emailAddress'],
             'firstName' => $user['firstName'],
-            'staffId' => $user['staffId'],
-            'otp' => $otp
-        ], 200);
+            'staffId' => $user['staffId']
+        ]);
     }
 
+    public function resendOTP(Request $request):JsonResponse
+    {
+        $user = Staff::where('staffId', $request->staffId)->first();
+        if ($user){
+            $otp = rand(100000, 999999);
+            Otp::updateOrCreate(
+                ['userId' => $user['staffId']],
+                ['otp' => $otp, 'expiry_at' => Carbon::now()->addMinutes(10),]
+            );
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'OTP successfully sent'
+        ]);
+    }
 
     public function finishResetPassword(Request $request): JsonResponse
     {
@@ -98,14 +114,14 @@ class AuthController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'OTP is not valid'
-            ], 400);
+            ]);
         }
 
         if (Carbon::now()->gt($otp->expiry_at)) {
             return response()->json([
-                'status' => false,
+                'success' => false,
                 'message' => 'OTP has expired'
-            ], 400);
+            ]);
         }
 
         $user = Staff::where('staffId', $request->staffId)->first();
@@ -114,7 +130,7 @@ class AuthController extends Controller
         $otp->delete();
 
         return response()->json([
-            'status' => true,
+            'success' => true,
             'message' => 'Password reset successfully'
         ]);
     }

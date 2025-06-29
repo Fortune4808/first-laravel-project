@@ -28,7 +28,7 @@ class UserResource extends JsonResource
                 'statusName' => $this->status->statusName ?? null,
                 'statusId' => $this->status->id ?? null,
             ],
-            'passport' => $this->passport
+            'passportUrl' => asset('storage/passports/admin/' . $this->passport)
         ];
     }
 }
