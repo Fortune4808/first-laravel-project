@@ -14,10 +14,10 @@ class UserController extends Controller
     {
         $users = User::with(['gender', 'status'])->paginate(50); 
 
-        if ($users->isEmpty()) {return response()->json(['status' => false,'message' => 'No record found!'], 404);}
+        if ($users->isEmpty()) {return response()->json(['status' => false,'message' => 'No record found!'], 200);}
 
         return response()->json([
-            'status' => true,
+            'success' => true,
             'message' => 'User fetched successfully',
             'data' => UserResource::collection($users->items()),
             'pagination' => [

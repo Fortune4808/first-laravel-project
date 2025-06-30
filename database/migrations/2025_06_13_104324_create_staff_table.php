@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('lastName');
             $table->string('mobileNumber', 100)->unique();
             $table->string('emailAddress')->unique();
-            $table->foreignId('genderId')->constrained('setup_gender', 'id')->onDelete('cascade');
-            $table->foreignId('statusId')->constrained('setup_status', 'id')->onDelete('cascade');
+            $table->foreignId('genderId')->constrained('setup_gender', 'id')->onDelete('cascade')->index();
+            $table->foreignId('statusId')->constrained('setup_status', 'id')->onDelete('cascade')->index();
             $table->string('passport')->nullable();
             $table->string('password');
             $table->timestamps();

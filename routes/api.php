@@ -32,7 +32,7 @@ Route::middleware(['auth:admin'])->group(function () {
 });
 Route::middleware(['auth:admin'])->post('/admin/passport', [StaffController::class, 'uploadPassport']);
 Route::middleware(['auth:admin', 'permission:VIEW STAFF'])->group(function () {
-   Route::apiResource('/admin', StaffController::class)->only(['index', 'show']);
+   Route::apiResource('/admin/list', StaffController::class)->only(['index', 'show']);
 });
 Route::middleware(['auth:admin', 'permission:UPDATE STAFF'])->group(function () {
    Route::apiResource('/admin', StaffController::class)->only(['update']);

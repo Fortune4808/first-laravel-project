@@ -21,8 +21,8 @@ class StaffController extends Controller
         $user = Auth::guard('admin')->user();
         $roleId = $user->roles->first()?->id;
         
-        if ($roleId==1){ $staff = Staff::with(['gender', 'status'])->where('staffId', '!=', $user->staffId)->paginate(50); }
-        if ($roleId > 1){ $staff = Staff::with(['gender', 'status'])
+        if ($roleId==1){ $staff = Staff::with(['gender:id,genderName', 'status:id,statusName'])->where('staffId', '!=', $user->staffId)->paginate(50); }
+        if ($roleId > 1){ $staff = Staff::with(['gender:id,genderName', 'status:id,statusName'])
             ->where('staffId', '!=', $user->staffId)
             ->whereHas('roles', function ($query) use ($roleId) { $query->where('id', '>=', $roleId); })->paginate(50); }
 
