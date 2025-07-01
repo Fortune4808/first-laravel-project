@@ -11,7 +11,29 @@ class LocationContoller extends Controller
 {
     public function index()
     {
-        return LocationResource::collection(Location::all());
+        $location = Location::paginate(50);
+        if ($location->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No record found!'
+            ], 200);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Location fetched successfully',
+            'data' => LocationResource::collection($location->items()),
+            'pagination' => [
+                'total' => $location->total(),
+                'perPage' => $location->perPage(),
+                'currentPage' => $location->currentPage(),
+                'lastPage' => $location->lastPage(),
+                'nextPageUrl' => $location->nextPageUrl(),
+                'prevPageUrl' => $location->previousPageUrl(),
+                'from' => $location->firstItem(),
+                'to' => $location->lastItem(),
+            ]
+        ]);
+         
     }
 
     public function store(Request $request)
@@ -56,7 +78,7 @@ class LocationContoller extends Controller
         $data = strtoupper($incomingFields['locationName']);
         $locationId->update(['locationName' => $data]);
         return response()->json([
-            'status' => true,
+            'success' => true,
             'message' => 'Location updated successfully'
         ], 200); 
     }
@@ -66,7 +88,7 @@ class LocationContoller extends Controller
         $location = Location::findOrFail($id);
         $location->delete();
         return response()->json([
-            'status' => true,
+            'success' => true,
             'message' => 'Location deleted successfully'
         ], 200);
     }
