@@ -16,8 +16,10 @@ return new class extends Migration
             $table->string('lastName');
             $table->string('mobileNumber', 100)->unique();
             $table->string('emailAddress')->unique();
-            $table->foreignId('genderId')->constrained('setup_gender', 'id')->onDelete('cascade')->index();
-            $table->foreignId('statusId')->constrained('setup_status', 'id')->onDelete('cascade')->index();
+            $table->unsignedBigInteger('statusId')->index();
+            $table->foreign('statusId')->references('id')->on('setup_status')->onDelete('cascade');
+            $table->unsignedBigInteger('genderId')->index();
+            $table->foreign('genderId')->references('id')->on('setup_gender')->onDelete('cascade');
             $table->string('passport')->nullable();
             $table->string('password');
             $table->timestamps();

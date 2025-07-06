@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\Setup\MasterCount;
 use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\User\UserResource;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
@@ -40,7 +41,8 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Login successful.',
-            'token' => $token
+            'token' => $token,
+            'data' => new UserResource($user)
         ], 200);
     }
 
@@ -66,6 +68,7 @@ class AuthController extends Controller
             'mobileNumber' => $request->mobileNumber,
             'genderId' => $request->genderId,
             'statusId' => 1,
+            'passport' => 'avatar.jpg',
             'password' => Hash::make($userId)
         ]);
 
@@ -141,7 +144,7 @@ class AuthController extends Controller
 
         if (Carbon::now()->gt($otp->expiry_at)) {
             return response()->json([
-                'status' => false,
+                'success' => false,
                 'message' => 'OTP has expired'
             ], 400);
         }
@@ -152,7 +155,7 @@ class AuthController extends Controller
         $otp->delete();
 
         return response()->json([
-            'status' => true,
+            'success' => true,
             'message' => 'Password reset successfully'
         ]);
     }

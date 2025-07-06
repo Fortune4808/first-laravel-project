@@ -2,15 +2,16 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\User\UserController;
+use App\Http\Controllers\Admin\SlotController;
+use App\Http\Controllers\Setup\RoleController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Setup\GenderController;
 use App\Http\Controllers\Setup\StatusController;
 use App\Http\Controllers\Admin\LocationContoller;
-use App\Http\Controllers\Admin\Auth\AuthController as AdminAuth;
-use App\Http\Controllers\Admin\SlotController;
+use App\Http\Controllers\User\UserSlotController;
 use App\Http\Controllers\User\Auth\AuthController as UserAuth;
+use App\Http\Controllers\Admin\Auth\AuthController as AdminAuth;
 use App\Http\Controllers\Admin\User\UserController as AdminUserController;
-use App\Http\Controllers\Setup\RoleController;
 
 Route::apiResource('/status', StatusController::class);
 Route::apiResource('/gender', GenderController::class);
@@ -59,7 +60,7 @@ Route::middleware(['auth:admin', 'permission:ADD SLOT'])->group(function () {
    Route::apiResource('/admin/slot', SlotController::class)->only(['store']);
 });
 Route::middleware(['auth:admin', 'permission:VIEW SLOT'])->group(function () {
-   Route::apiResource('/admin/slot', LocationContoller::class)->only(['index', 'show']);
+   Route::apiResource('/admin/slot', SlotController::class)->only(['index', 'show']);
 });
 Route::middleware(['auth:admin', 'permission:UPDATE SLOT'])->group(function () {
    Route::apiResource('/admin/slot', SlotController::class)->only(['update']);
@@ -67,6 +68,9 @@ Route::middleware(['auth:admin', 'permission:UPDATE SLOT'])->group(function () {
 
 Route::middleware(['auth:users'])->group(function () {
    Route::apiResource('/user', UserController::class);
+});
+Route::middleware(['auth:users'])->group(function () {
+   Route::apiResource('/slots', UserSlotController::class)->only(['index']);
 });
 
 

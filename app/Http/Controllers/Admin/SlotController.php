@@ -12,7 +12,28 @@ class SlotController extends Controller
 {
     public function index()
     {
-        return SlotResource::collection(Slot::all());
+        $location = Slot::with(['locations:id,locationName', 'status:id,statusName'])->paginate(50);
+        if ($location->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No record found!'
+            ], 200);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Slot fetched successfully',
+            'data' => SlotResource::collection($location->items()),
+            'pagination' => [
+                'total' => $location->total(),
+                'perPage' => $location->perPage(),
+                'currentPage' => $location->currentPage(),
+                'lastPage' => $location->lastPage(),
+                'nextPageUrl' => $location->nextPageUrl(),
+                'prevPageUrl' => $location->previousPageUrl(),
+                'from' => $location->firstItem(),
+                'to' => $location->lastItem(),
+            ]
+        ]);
     }
 
     public function store(Request $request)
@@ -43,7 +64,7 @@ class SlotController extends Controller
 
     public function show(string $id)
     {
-        return new LocationResource(Slot::findOrFail($id));
+        return new SlotResource(Slot::findOrFail($id));
     }
 
     public function update(Request $request, string $id)
